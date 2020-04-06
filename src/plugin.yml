@@ -1,0 +1,16 @@
+main: me.Defracted.LegendaryItems.Main
+version: R1.1
+name: "LegendaryItems"
+api-version: "1.15"
+author: "Defracted7"
+
+commands:
+  leagueboots:
+    description: "Выдаёт супер-ботолы"
+    usage: "/leagueboots"
+    permission: "legendaryitems.get.boots"
+
+  mjollnir:
+    description: "Выдаёт Мьёльнир"
+    usage: "/mjollnir"
+    permission: "legendaryitems.get.mjollnir"
