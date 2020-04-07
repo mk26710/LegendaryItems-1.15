@@ -1,5 +1,5 @@
 main: me.Defracted.LegendaryItems.Main
-version: R1.1
+version: R1.4
 name: "LegendaryItems"
 api-version: "1.15"
 author: "Defracted7"
@@ -14,3 +14,8 @@ commands:
     description: "Выдаёт Мьёльнир"
     usage: "/mjollnir"
     permission: "legendaryitems.get.mjollnir"
+
+  capshield:
+    description: "Выдаёт побрекушка Капитана Омэрики"
+    usage: "/capshield"
+    permission: "legendaryitems.get.capshield"
