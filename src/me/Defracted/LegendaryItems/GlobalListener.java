@@ -4,6 +4,7 @@ import me.Defracted.LegendaryItems.Items.SevenLeagueBoots;
 import me.Defracted.LegendaryItems.Items.TheMjollnir;
 import net.md_5.bungee.api.ChatColor;
 
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -36,18 +37,17 @@ public class GlobalListener implements Listener {
         Player player = (Player) event.getPlayer();
 
         // Проверяем, если у игрока в руке топор Мьёльнир
-        if (player.getInventory().getItemInMainHand().getType() == Material.DIAMOND_AXE)
-            if (player.getInventory().getItemInMainHand().isSimilar(TheMjollnir.get())) {
-                // Если сидит - вносим в список сидящих с Мьёлбниром
-                // Если нет - проверяем нгаличие в списке сидящих и убираем оттуда
-                if (event.isSneaking()) {
-                    crouchingPlayersWithMjolnir.add(player.getUniqueId());
-                } else {
-                    if (crouchingPlayersWithMjolnir.contains(player.getUniqueId())) {
-                        crouchingPlayersWithMjolnir.remove(player.getUniqueId());
-                    }
+        if (player.getInventory().getItemInMainHand().isSimilar(TheMjollnir.get())) {
+            // Если сидит - вносим в список сидящих с Мьёлбниром
+            // Если нет - проверяем нгаличие в списке сидящих и убираем оттуда
+            if (event.isSneaking()) {
+                crouchingPlayersWithMjolnir.add(player.getUniqueId());
+            } else {
+                if (crouchingPlayersWithMjolnir.contains(player.getUniqueId())) {
+                    crouchingPlayersWithMjolnir.remove(player.getUniqueId());
                 }
             }
+        }
     }
 
     @EventHandler
@@ -100,54 +100,57 @@ public class GlobalListener implements Listener {
     public void onClick(PlayerInteractEvent event) {
         Player player = (Player) event.getPlayer();
 
-        if (player.getInventory().getItemInMainHand().getType() == Material.DIAMOND_AXE)
-            if (player.getInventory().getItemInMainHand().isSimilar(TheMjollnir.get())) {
-                // ПКМ
-                if (event.getAction() == Action.RIGHT_CLICK_AIR) {
-                    // Проверяем, есть ли у игрока какие-либо кулдауны
-                    if (lightningStrikeCooldowns.containsKey(player.getUniqueId())) {
-                        // Сверяем момент получения послежнего кулдауна, с текущим
-                        if (lightningStrikeCooldowns.get(player.getUniqueId()) > System.currentTimeMillis()) {
-                            long timeReset = (lightningStrikeCooldowns.get(player.getUniqueId()) - System.currentTimeMillis()) / 1000;
-                            player.sendMessage(ChatColor.RED + "Удар молний можно будет использовать через " + timeReset + " секунд(у).");
+        if (player.getInventory().getItemInMainHand().isSimilar(TheMjollnir.get())) {
+            // ПКМ
+            if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                // Проверяем, есть ли у игрока какие-либо кулдауны
+                if (lightningStrikeCooldowns.containsKey(player.getUniqueId())) {
+                    // Сверяем момент получения послежнего кулдауна, с текущим
+                    if (lightningStrikeCooldowns.get(player.getUniqueId()) > System.currentTimeMillis()) {
+                        long timeReset = (lightningStrikeCooldowns.get(player.getUniqueId()) - System.currentTimeMillis()) / 1000;
+                        player.sendMessage(ChatColor.RED + "Удар молний можно будет использовать через " + timeReset + " секунд(у).");
+                        return;
+                    }
+                }
+
+                World world = player.getWorld();
+                Block targetBlock = player.getTargetBlockExact(20, FluidCollisionMode.NEVER);
+
+                if (targetBlock == null) {
+                    return;
+                }
+
+                // Если блок-цель = воздуху, ничего не делаем.
+                if (targetBlock.getType() == Material.AIR) {
+                    return;
+                }
+
+                Location strikingLocationMain = targetBlock.getLocation();
+
+                for (int i = 0; i <= 5; i++) {
+                    world.strikeLightning(strikingLocationMain);
+                }
+
+                // Обновляем данные в хэшкарте кулдаунов
+                lightningStrikeCooldowns.put(player.getUniqueId(), System.currentTimeMillis() + (25 * 1000));
+                return;
+            }
+
+            // ЛКМ
+            if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+                if (crouchingPlayersWithMjolnir.contains(player.getUniqueId())) {
+                    if (dragonBallCooldowns.containsKey(player.getUniqueId())) {
+                        if (dragonBallCooldowns.get(player.getUniqueId()) > System.currentTimeMillis()) {
+                            long timeReset = (dragonBallCooldowns.get(player.getUniqueId()) - System.currentTimeMillis()) / 1000;
+                            player.sendMessage(ChatColor.DARK_PURPLE + "Шар дракона Энда можно будет использовать через " + timeReset + " секунд(у).");
                             return;
                         }
                     }
 
-                    World world = player.getWorld();
-                    Block targetBlock = player.getTargetBlock((Set<Material>) null, 20);
-
-                    // Если блок-цель = воздуху, ничего не делаем.
-                    if (targetBlock.getType() == Material.AIR) {
-                        return;
-                    }
-
-                    Location strikingLocationMain = targetBlock.getLocation();
-
-                    for (int i = 0; i <= 5; i++) {
-                        world.strikeLightning(strikingLocationMain);
-                    }
-
-                    // Обновляем данные в хэшкарте кулдаунов
-                    lightningStrikeCooldowns.put(player.getUniqueId(), System.currentTimeMillis() + (25 * 1000));
-                    return;
-                }
-
-                // ЛКМ
-                if (event.getAction() == Action.LEFT_CLICK_AIR) {
-                    if (crouchingPlayersWithMjolnir.contains(player.getUniqueId())) {
-                        if (dragonBallCooldowns.containsKey(player.getUniqueId())) {
-                            if (dragonBallCooldowns.get(player.getUniqueId()) > System.currentTimeMillis()) {
-                                long timeReset = (dragonBallCooldowns.get(player.getUniqueId()) - System.currentTimeMillis()) / 1000;
-                                player.sendMessage(ChatColor.DARK_PURPLE + "Шар дракона Энда можно будет использовать через " + timeReset + " секунд(у).");
-                                return;
-                            }
-                        }
-
-                        player.launchProjectile(DragonFireball.class);
-                        dragonBallCooldowns.put(player.getUniqueId(), System.currentTimeMillis() + (15 * 1000));
-                    }
+                    player.launchProjectile(DragonFireball.class);
+                    dragonBallCooldowns.put(player.getUniqueId(), System.currentTimeMillis() + (15 * 1000));
                 }
             }
+        }
     }
 }

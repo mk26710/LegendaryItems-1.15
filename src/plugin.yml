@@ -1,5 +1,5 @@
 main: me.Defracted.LegendaryItems.Main
-version: R1.4
+version: R1.6
 name: "LegendaryItems"
 api-version: "1.15"
 author: "Defracted7"
@@ -19,3 +19,24 @@ commands:
     description: "Выдаёт побрекушка Капитана Омэрики"
     usage: "/capshield"
     permission: "legendaryitems.get.capshield"
+
+
+permissions:
+  legendaryitems.get.boots:
+    description: "Доступ к команде /leagueboots"
+    default: op
+
+  legendaryitems.get.mjollnir:
+    description: "Доступ к команде /mjollnir"
+    default: op
+
+  legendaryitems.get.capshield:
+    description: "Доступ к команде /capshield"
+    default: op
+
+  legendaryitems.*:
+    description: "Полный доступ ко всем командам плагина Legendary Items"
+    children:
+      legendaryitems.get.boots: true
+      legendaryitems.get.mjollnir: true
+      legendaryitems.get.capshield: true

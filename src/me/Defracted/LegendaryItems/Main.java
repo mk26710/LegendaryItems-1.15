@@ -7,25 +7,25 @@ import me.Defracted.LegendaryItems.TabCompleters.BootsCompleter;
 
 import me.Defracted.LegendaryItems.commands.CapShield;
 import me.Defracted.LegendaryItems.commands.Mjollnir;
-import org.bukkit.event.Listener;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Main extends JavaPlugin implements Listener {
+import java.util.Objects;
+
+public class Main extends JavaPlugin {
+    private void loadCommand(String command, CommandExecutor Executor, TabCompleter Completer) {
+        Objects.requireNonNull(getCommand(command)).setExecutor(Executor);
+        Objects.requireNonNull(getCommand(command)).setTabCompleter(Completer);
+    }
+
     @Override
     public void onEnable() {
         this.getServer().getPluginManager().registerEvents(new GlobalListener(this), this);
 
-        // Добавляет сапоги не от гучи
-        this.getCommand("leagueboots").setExecutor(new Boots());
-        this.getCommand("leagueboots").setTabCompleter(new BootsCompleter());
-
-        // Добавляет Mjollnir
-        this.getCommand("mjollnir").setExecutor(new Mjollnir());
-        this.getCommand("mjollnir").setTabCompleter(new MjollnirCompleter());
-
-        // Добавляет щит
-        this.getCommand("capshield").setExecutor(new CapShield());
-        this.getCommand("capshield").setTabCompleter(new CapShieldCompleter());
+        loadCommand("leagueboots", new Boots(), new BootsCompleter());
+        loadCommand("mjollnir", new Mjollnir(), new MjollnirCompleter());
+        loadCommand("capshield", new CapShield(), new CapShieldCompleter());
     }
 
     @Override
